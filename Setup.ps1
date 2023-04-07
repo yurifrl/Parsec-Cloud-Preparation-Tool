@@ -38,8 +38,25 @@ $softwareList = @(
   }
 )
 
-foreach ($software in $softwareList) {
-  Install-Executable -url $software.Url -output $software.Name
+$installSoftware = Read-Host -Prompt ('Install a bunch of stuff? (y/n)')
+if ($installSoftware -eq 'y') {
+  $jobs = @()
+  foreach ($software in $softwareList) {
+    $job = Start-Job -ScriptBlock {
+      param($url, $name)
+      Install-Executable -url $url -output $name
+    } -ArgumentList $software.Url, $software.Name
+    $jobs += $job
+  }
+
+  # Wait for all jobs to complete
+  $jobs | Wait-Job | Out-Null
+
+  # Retrieve and display the results
+  $jobs | Receive-Job
+
+  # Clean up the jobs
+  $jobs | Remove-Job
 }
 
 # Modify Registry
