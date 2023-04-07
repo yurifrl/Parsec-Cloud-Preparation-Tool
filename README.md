@@ -2,11 +2,11 @@
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls" 
-$ScriptWebArchive = "https://github.com/yuriflr/til/archive/main.zip"  
-$LocalArchivePath = "$ENV:UserProfile\Downloads\BoostrapScript"  
+$ScriptWebArchive = "https://github.com/yurifrl/Parsec-Cloud-Preparation-Tool/archive/main.zip"  
+$LocalArchivePath = "$ENV:UserProfile\Downloads\Parsec-Cloud-Preparation-Tool"  
 (New-Object System.Net.WebClient).DownloadFile($ScriptWebArchive, "$LocalArchivePath.zip")  
 Expand-Archive "$LocalArchivePath.zip" -DestinationPath $LocalArchivePath -Force  
-CD $LocalArchivePath\til-main\ | powershell.exe .\cloudgaming\scripts.ps1   
+CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-main\ | powershell.exe .\Setup.ps1  
 ```
 
 # Guides
