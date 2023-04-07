@@ -9,6 +9,10 @@ function Install-Executable($url, $name) {
 
 $softwareList = @(
   @{
+    "Name"  = "Firefox"
+    "Url"   = "https://cdn.stubdownloader.services.mozilla.com/builds/firefox-stub/pt-BR/win/793925e36c1d92460e349e7af6a5f4a708c9acb6ffea5be0fe11dcf56def58bb/Firefox%20Installer.exe" 
+  },
+  @{
     "Name"  = "Parsec"
     "Url"   = "https://builds.parsec.app/package/parsec-windows.exe" 
   },
@@ -31,10 +35,6 @@ $softwareList = @(
   @{
     "Name"  = "Battle.net"
     "Url"   = "https://us.battle.net/download/getInstaller?os=win&installer=Battle.net-Setup.exe" 
-  },
-  @{
-    "Name"  = "Firefox"
-    "Url"   = "https://cdn.stubdownloader.services.mozilla.com/builds/firefox-stub/pt-BR/win/793925e36c1d92460e349e7af6a5f4a708c9acb6ffea5be0fe11dcf56def58bb/Firefox%20Installer.exe" 
   }
 )
 
