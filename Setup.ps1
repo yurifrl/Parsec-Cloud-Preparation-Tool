@@ -39,10 +39,7 @@ $softwareList = @(
 )
 
 foreach ($software in $softwareList) {
-  $installSoftware = Read-Host -Prompt ('Do you want to install {0}? (y/n)' -f $software.Name)
-  if ($installSoftware -eq 'y') {
-    Install-Executable -url $software.Url -output $software.Output
-  }
+  Install-Executable -url $software.Url -output $software.Name
 }
 
 # Modify Registry
