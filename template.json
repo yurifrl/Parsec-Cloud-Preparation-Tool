@@ -1,0 +1,307 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "defaultValue": "parsec",
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "string"
+        },
+        "customData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "String passed down to the Virtual Machine."
+            }
+        },
+        "virtualMachineSize": {
+            "defaultValue": "Standard_NV6ads_A10_v5",
+            "type": "string"
+        },
+        "maxPrice": {
+            "defaultValue": 1,
+            "type": "int"
+        }
+    },
+    "variables": {
+        "location": "brazilsouth",
+        "zone": "2",
+        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('name'))]",
+        "vnetName": "[parameters('name')]",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('name'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'default')]",
+        "dataDisks": [
+            {
+                "lun": 0,
+                "createOption": "attach",
+                "deleteOption": "Detach",
+                "caching": "ReadOnly",
+                "writeAcceleratorEnabled": false,
+                "id": null,
+                "name": "parsec",
+                "storageAccountType": null,
+                "diskSizeGB": null,
+                "diskEncryptionSet": null
+            }
+        ],
+        "dataDiskResources": [
+            {
+                "name": "parsec",
+                "sku": "Premium_LRS",
+                "properties": {
+                    "diskSizeGB": 128,
+                    "creationData": {
+                        "createOption": "empty"
+                    }
+                }
+            }
+        ]
+    },
+    "resources": [
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2022-03-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "managedDiskResources",
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        },
+                        "deleteOption": "Delete"
+                    },
+                    "imageReference": {
+                        "publisher": "microsoftwindowsdesktop",
+                        "offer": "windows-11",
+                        "sku": "win11-21h2-pro",
+                        "version": "latest"
+                    },
+                    "copy": [
+                        {
+                            "name": "dataDisks",
+                            "count": "[length(variables('dataDisks'))]",
+                            "input": {
+                                "lun": "[variables('dataDisks')[copyIndex('dataDisks')].lun]",
+                                "createOption": "[variables('dataDisks')[copyIndex('dataDisks')].createOption]",
+                                "caching": "[variables('dataDisks')[copyIndex('dataDisks')].caching]",
+                                "diskSizeGB": "[variables('dataDisks')[copyIndex('dataDisks')].diskSizeGB]",
+                                "managedDisk": {
+                                    "id": "[coalesce(variables('dataDisks')[copyIndex('dataDisks')].id, if(equals(variables('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', variables('dataDisks')[copyIndex('dataDisks')].name)))]",
+                                    "storageAccountType": "[variables('dataDisks')[copyIndex('dataDisks')].storageAccountType]"
+                                },
+                                "deleteOption": "[variables('dataDisks')[copyIndex('dataDisks')].deleteOption]",
+                                "writeAcceleratorEnabled": "[variables('dataDisks')[copyIndex('dataDisks')].writeAcceleratorEnabled]"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('name'))]",
+                            "properties": {
+                                "deleteOption": "Delete"
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('name')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "customData": "[base64(parameters('customData'))]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": false,
+                        "provisionVmAgent": false,
+                        "patchSettings": {
+                            "enableHotpatching": false,
+                            "patchMode": "Manual"
+                        }
+                    }
+                },
+                "licenseType": "Windows_Client",
+                "priority": "Spot",
+                "evictionPolicy": "Deallocate",
+                "billingProfile": {
+                    "maxPrice": "[parameters('maxPrice')]"
+                },
+                "securityProfile": {
+                    "securityType": "TrustedLaunch",
+                    "uefiSettings": {
+                        "secureBootEnabled": false,
+                        "vTpmEnabled": false
+                    }
+                },
+                "provisioningState": 0,
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            },
+            "tags": {
+                "name": "parsec"
+            },
+            "zones": [
+                "2"
+            ]
+        },
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2021-08-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('name'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('name'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAddress": "10.0.0.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('name'))]",
+                                "properties": {
+                                    "deleteOption": "Delete"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": true,
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            },
+            "tags": {
+                "name": "parsec"
+            }
+        },
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "parsec-server",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8000-8040",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1020,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "priority": 300,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "name": "parsec"
+            }
+        },
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2021-01-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "name": "parsec"
+            }
+        },
+        {
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-08-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            },
+            "sku": {
+                "name": "Standard"
+            },
+            "zones": [
+                "2"
+            ],
+            "tags": {
+                "name": "parsec"
+            }
+        },
+        {
+            "name": "[variables('dataDiskResources')[copyIndex()].name]",
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2022-03-02",
+            "location": "[variables('location')]",
+            "properties": "[variables('dataDiskResources')[copyIndex()].properties]",
+            "sku": {
+                "name": "[variables('dataDiskResources')[copyIndex()].sku]"
+            },
+            "copy": {
+                "name": "managedDiskResources",
+                "count": "[length(variables('dataDiskResources'))]"
+            },
+            "zones": "[if(contains(variables('dataDiskResources')[copyIndex()].sku, '_ZRS'), json('null'), array(2))]",
+            "tags": {
+                "name": "parsec"
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+}
