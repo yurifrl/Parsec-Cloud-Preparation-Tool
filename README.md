@@ -7,8 +7,6 @@ $LocalArchivePath = "$ENV:UserProfile\Downloads\Parsec-Cloud-Preparation-Tool"
 (New-Object System.Net.WebClient).DownloadFile($ScriptWebArchive, "$LocalArchivePath.zip")  
 Expand-Archive "$LocalArchivePath.zip" -DestinationPath $LocalArchivePath -Force  
 CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-main\ | powershell.exe .\Setup.ps1  
-Remove-Item -Path "$LocalArchivePath.zip" -Force
-Remove-Item -Path $LocalArchivePath -Recurse -Force
 ```
 
 From [Parsec-Cloud-Preparation-Tool](https://github.com/parsec-cloud/Parsec-Cloud-Preparation-Tool)
@@ -19,9 +17,7 @@ $ScriptWebArchive = "https://github.com/parsec-cloud/Parsec-Cloud-Preparation-To
 $LocalArchivePath = "$ENV:UserProfile\Downloads\Parsec-Cloud-Preparation-Tool"  
 (New-Object System.Net.WebClient).DownloadFile($ScriptWebArchive, "$LocalArchivePath.zip")  
 Expand-Archive "$LocalArchivePath.zip" -DestinationPath $LocalArchivePath -Force  
-CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-master\ | powershell.exe .\Loader.ps1
-Remove-Item -Path "$LocalArchivePath.zip" -Force
-Remove-Item -Path $LocalArchivePath -Recurse -Force  
+CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-master\ | powershell.exe .\Loader.ps1  
 ```
 
 # Guides
