@@ -1,4 +1,4 @@
-# Run Star Citizen on Azure
+# Bootstrap parsec machine on azure
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls" 
@@ -29,7 +29,4 @@ CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-master\ | powershell.exe .\Lo
 
 ## Issues with Windows RDP
 
-[parsec guide on dealing with rdp issues](https://support.parsec.app/hc/en-us/articles/360002165172)
-
-- Navigate to Local `Computer Policy > Computer Configuration > Administrative Templates > Windows Components > Remote Desktop Services > Remote Desktop Session Host > Remote Session Environment`
-- Set "Use WDDM graphics display driver..." to "Disabled"
+- Remove `Microsoft Hyper-V Video` from `Device Manager` > `Display Adapters`

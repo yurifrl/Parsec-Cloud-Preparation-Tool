@@ -12,13 +12,6 @@
         "adminPassword": {
             "type": "string"
         },
-        "customData": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "String passed down to the Virtual Machine."
-            }
-        },
         "virtualMachineSize": {
             "defaultValue": "Standard_NV6ads_A10_v5",
             "type": "string"
@@ -26,6 +19,13 @@
         "maxPrice": {
             "defaultValue": 1,
             "type": "int"
+        },
+        "customData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "String passed down to the Virtual Machine."
+            }
         }
     },
     "variables": {
@@ -34,33 +34,7 @@
         "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('name'))]",
         "vnetName": "[parameters('name')]",
         "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('name'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'default')]",
-        "dataDisks": [
-            {
-                "lun": 0,
-                "createOption": "attach",
-                "deleteOption": "Detach",
-                "caching": "ReadOnly",
-                "writeAcceleratorEnabled": false,
-                "id": null,
-                "name": "parsec",
-                "storageAccountType": null,
-                "diskSizeGB": null,
-                "diskEncryptionSet": null
-            }
-        ],
-        "dataDiskResources": [
-            {
-                "name": "parsec",
-                "sku": "Premium_LRS",
-                "properties": {
-                    "diskSizeGB": 128,
-                    "creationData": {
-                        "createOption": "empty"
-                    }
-                }
-            }
-        ]
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'default')]"
     },
     "resources": [
         {
@@ -69,7 +43,6 @@
             "apiVersion": "2022-03-01",
             "location": "[variables('location')]",
             "dependsOn": [
-                "managedDiskResources",
                 "[concat('Microsoft.Network/networkInterfaces/', parameters('name'))]"
             ],
             "properties": {
@@ -78,36 +51,20 @@
                 },
                 "storageProfile": {
                     "osDisk": {
+                        "name": "parsec",
+                        "diskSizeGB": 256,
+                        "deleteOption": "Detach",
                         "createOption": "fromImage",
                         "managedDisk": {
                             "storageAccountType": "Premium_LRS"
-                        },
-                        "deleteOption": "Delete"
+                        }
                     },
                     "imageReference": {
                         "publisher": "microsoftwindowsdesktop",
                         "offer": "windows-11",
                         "sku": "win11-21h2-pro",
                         "version": "latest"
-                    },
-                    "copy": [
-                        {
-                            "name": "dataDisks",
-                            "count": "[length(variables('dataDisks'))]",
-                            "input": {
-                                "lun": "[variables('dataDisks')[copyIndex('dataDisks')].lun]",
-                                "createOption": "[variables('dataDisks')[copyIndex('dataDisks')].createOption]",
-                                "caching": "[variables('dataDisks')[copyIndex('dataDisks')].caching]",
-                                "diskSizeGB": "[variables('dataDisks')[copyIndex('dataDisks')].diskSizeGB]",
-                                "managedDisk": {
-                                    "id": "[coalesce(variables('dataDisks')[copyIndex('dataDisks')].id, if(equals(variables('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', variables('dataDisks')[copyIndex('dataDisks')].name)))]",
-                                    "storageAccountType": "[variables('dataDisks')[copyIndex('dataDisks')].storageAccountType]"
-                                },
-                                "deleteOption": "[variables('dataDisks')[copyIndex('dataDisks')].deleteOption]",
-                                "writeAcceleratorEnabled": "[variables('dataDisks')[copyIndex('dataDisks')].writeAcceleratorEnabled]"
-                            }
-                        }
-                    ]
+                    }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -275,24 +232,6 @@
             "zones": [
                 "2"
             ],
-            "tags": {
-                "name": "parsec"
-            }
-        },
-        {
-            "name": "[variables('dataDiskResources')[copyIndex()].name]",
-            "type": "Microsoft.Compute/disks",
-            "apiVersion": "2022-03-02",
-            "location": "[variables('location')]",
-            "properties": "[variables('dataDiskResources')[copyIndex()].properties]",
-            "sku": {
-                "name": "[variables('dataDiskResources')[copyIndex()].sku]"
-            },
-            "copy": {
-                "name": "managedDiskResources",
-                "count": "[length(variables('dataDiskResources'))]"
-            },
-            "zones": "[if(contains(variables('dataDiskResources')[copyIndex()].sku, '_ZRS'), json('null'), array(2))]",
             "tags": {
                 "name": "parsec"
             }
