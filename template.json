@@ -20,6 +20,10 @@
             "defaultValue": 1,
             "type": "int"
         },
+        "diskSizeGB": {
+            "defaultValue": 128,
+            "type": "int"
+        },
         "customData": {
             "type": "string",
             "defaultValue": "",
@@ -52,7 +56,7 @@
                 "storageProfile": {
                     "osDisk": {
                         "name": "parsec",
-                        "diskSizeGB": 256,
+                        "diskSizeGB": "[parameters('diskSizeGB)]",
                         "deleteOption": "Detach",
                         "createOption": "fromImage",
                         "managedDisk": {
