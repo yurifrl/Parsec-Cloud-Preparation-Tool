@@ -38,40 +38,28 @@ $softwareList = @(
   }
 )
 
-$continueInstallation = Read-Host -Prompt 'Do you want to continue with the installation? (y/n)'
-if ($continueInstallation -eq 'y') {
-  $jobs = @()
-  foreach ($software in $softwareList) {
-    $job = Start-Job -ScriptBlock {
-      param($url, $name)
-      Install-Executable -url $url -output $name
-    } -ArgumentList $software.Url, $software.Name
-    $jobs += $job
-  }
+foreach ($software in $softwareList) {
+    Write-Host "Press any key to install $($software.Name), or 's' to skip."
+    $key = $Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown").Character
 
-  # Wait for all jobs to complete
-  $jobs | Wait-Job | Out-Null
-
-  # Retrieve and display the results
-  $jobs | Receive-Job
-
-  # Clean up the jobs
-  $jobs | Remove-Job
+    if ($key -ne 's') {
+        "Installing $($software.Name)..."
+        Install-Executable -url $software.Url -output $software.Name
+    }
 }
 
+# Modify Registry
+$modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
+if ($modifyRegistry -eq 'y') {
+  # Modify the 'Winlogon' registry key
+  $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+  $WinlogonPropertyName = "YourPropertyName" # Replace with the actual property name
+  $WinlogonPropertyValue = "YourValue" # Replace with the actual value you want to set
+  Set-ItemProperty -Path $WinlogonPath -Name $WinlogonPropertyName -Value $WinlogonPropertyValue
 
-# # Modify Registry
-# $modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
-# if ($modifyRegistry -eq 'y') {
-#   # Modify the 'Winlogon' registry key
-#   $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-#   $WinlogonPropertyName = "YourPropertyName" # Replace with the actual property name
-#   $WinlogonPropertyValue = "YourValue" # Replace with the actual value you want to set
-#   Set-ItemProperty -Path $WinlogonPath -Name $WinlogonPropertyName -Value $WinlogonPropertyValue
-
-#   # Modify the 'Personalization' registry key
-#   $PersonalizationPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
-#   $PersonalizationPropertyName = "YourPropertyName" # Replace with the actual property name
-#   $PersonalizationPropertyValue = "YourValue" # Replace with the actual value you want to set
-#   Set-ItemProperty -Path $PersonalizationPath -Name $PersonalizationPropertyName -Value $PersonalizationPropertyValue
-# }
+  # Modify the 'Personalization' registry key
+  $PersonalizationPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+  $PersonalizationPropertyName = "YourPropertyName" # Replace with the actual property name
+  $PersonalizationPropertyValue = "YourValue" # Replace with the actual value you want to set
+  Set-ItemProperty -Path $PersonalizationPath -Name $PersonalizationPropertyName -Value $PersonalizationPropertyValue
+}
