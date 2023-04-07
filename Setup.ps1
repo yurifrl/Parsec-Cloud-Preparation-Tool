@@ -38,7 +38,7 @@ $softwareList = @(
   }
 )
 
-$installSoftware = Read-Host -Prompt ('Install a bunch of stuff? (y/n)')
+$installSoftware = Read-Host -Prompt 'Install a bunch of stuff? (y/n)'
 if ($installSoftware -eq 'y') {
   $jobs = @()
   foreach ($software in $softwareList) {
