@@ -38,8 +38,8 @@ $softwareList = @(
   }
 )
 
-$installSoftware = Read-Host -Prompt 'Install a bunch of stuff? (y/n)'
-if ($installSoftware -eq 'y') {
+$installAll = Read-Host -Prompt 'Do you want to install abunch of stuff? (y/n)'
+if ($installAll -eq 'y') {
   $jobs = @()
   foreach ($software in $softwareList) {
     $job = Start-Job -ScriptBlock {
