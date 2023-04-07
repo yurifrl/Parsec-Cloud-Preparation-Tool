@@ -59,18 +59,18 @@ if ($installAll -eq 'y') {
   $jobs | Remove-Job
 }
 
-# Modify Registry
-$modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
-if ($modifyRegistry -eq 'y') {
-  # Modify the 'Winlogon' registry key
-  $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-  $WinlogonPropertyName = "YourPropertyName" # Replace with the actual property name
-  $WinlogonPropertyValue = "YourValue" # Replace with the actual value you want to set
-  Set-ItemProperty -Path $WinlogonPath -Name $WinlogonPropertyName -Value $WinlogonPropertyValue
+# # Modify Registry
+# $modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
+# if ($modifyRegistry -eq 'y') {
+#   # Modify the 'Winlogon' registry key
+#   $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+#   $WinlogonPropertyName = "YourPropertyName" # Replace with the actual property name
+#   $WinlogonPropertyValue = "YourValue" # Replace with the actual value you want to set
+#   Set-ItemProperty -Path $WinlogonPath -Name $WinlogonPropertyName -Value $WinlogonPropertyValue
 
-  # Modify the 'Personalization' registry key
-  $PersonalizationPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
-  $PersonalizationPropertyName = "YourPropertyName" # Replace with the actual property name
-  $PersonalizationPropertyValue = "YourValue" # Replace with the actual value you want to set
-  Set-ItemProperty -Path $PersonalizationPath -Name $PersonalizationPropertyName -Value $PersonalizationPropertyValue
-}
+#   # Modify the 'Personalization' registry key
+#   $PersonalizationPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+#   $PersonalizationPropertyName = "YourPropertyName" # Replace with the actual property name
+#   $PersonalizationPropertyValue = "YourValue" # Replace with the actual value you want to set
+#   Set-ItemProperty -Path $PersonalizationPath -Name $PersonalizationPropertyName -Value $PersonalizationPropertyValue
+# }
