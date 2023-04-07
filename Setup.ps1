@@ -38,8 +38,8 @@ $softwareList = @(
   }
 )
 
-$installAll = Read-Host -Prompt 'Do you want to install abunch of stuff? (y/n)'
-if ($installAll -eq 'y') {
+$continueInstallation = Read-Host -Prompt 'Do you want to continue with the installation? (y/n)'
+if ($continueInstallation -eq 'y') {
   $jobs = @()
   foreach ($software in $softwareList) {
     $job = Start-Job -ScriptBlock {
@@ -58,6 +58,7 @@ if ($installAll -eq 'y') {
   # Clean up the jobs
   $jobs | Remove-Job
 }
+
 
 # # Modify Registry
 # $modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
