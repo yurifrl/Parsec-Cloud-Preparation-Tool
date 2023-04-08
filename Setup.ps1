@@ -47,26 +47,3 @@ foreach ($software in $softwareList) {
         Install-Executable -url $software.Url -output $software.Name
     }
 }
-
-# Modify Registry
-$modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
-if ($modifyRegistry -eq 'y') {
-  # Set DefaultUserName to 'parsec'
-  $username = "your_username_here"
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultUserName" -Value $username
-
-  # Set DefaultPassword to the desired password
-  $password = "your_password_here"
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value $password
-
-  # Set AutoAdminLogon to 1
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "1"
-
-  # Create Personalization key if it does not exist
-  if (-not(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
-      New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "Personalization" | Out-Null
-  }
-
-  # Set NoLockScreen D-word value to 1
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -Value 1 -Type DWord
-}

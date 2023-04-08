@@ -2,14 +2,18 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "name": {
+        "adminPassword": {
+            "type": "string",
+            "metadata": {
+                "description": "8 characters minimum, 1 uppercase, 1 number"
+            }
+        },
+        "adminUsername": {
             "defaultValue": "parsec",
             "type": "string"
         },
-        "adminUsername": {
-            "type": "string"
-        },
-        "adminPassword": {
+        "name": {
+            "defaultValue": "Parsec",
             "type": "string"
         },
         "virtualMachineSize": {
@@ -23,6 +27,17 @@
         "diskSizeGB": {
             "defaultValue": 128,
             "type": "int"
+        },
+        "osOption": {
+            "type": "string",
+            "defaultValue": "Windows11",
+            "allowedValues": [
+                "Windows11",
+                "Windows10"
+            ],
+            "metadata": {
+                "description": "Select an OS option from the allowed options."
+            }
         },
         "customData": {
             "type": "string",
@@ -38,7 +53,20 @@
         "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('name'))]",
         "vnetName": "[parameters('name')]",
         "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('name'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'default')]"
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'default')]",
+        "windows11": {
+            "publisher": "microsoftwindowsdesktop",
+            "offer": "windows-11",
+            "sku": "win11-21h2-pro",
+            "version": "latest"
+        },
+        "windows10": {
+            "publisher": "MicrosoftWindowsDesktop",
+            "offer": "Windows-10",
+            "sku": "win10-21h2-pro-g2",
+            "version": "latest"
+        },
+        "selectedOs": "[variables(parameters('osOption'))]"
     },
     "resources": [
         {
@@ -56,19 +84,14 @@
                 "storageProfile": {
                     "osDisk": {
                         "name": "parsec",
-                        "diskSizeGB": "[parameters('diskSizeGB)]",
+                        "diskSizeGB": "[parameters('diskSizeGB')]",
                         "deleteOption": "Detach",
                         "createOption": "fromImage",
                         "managedDisk": {
                             "storageAccountType": "Premium_LRS"
                         }
                     },
-                    "imageReference": {
-                        "publisher": "microsoftwindowsdesktop",
-                        "offer": "windows-11",
-                        "sku": "win11-21h2-pro",
-                        "version": "latest"
-                    }
+                    "imageReference": "[variables('selectedOs')]"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
@@ -87,9 +110,9 @@
                     "customData": "[base64(parameters('customData'))]",
                     "windowsConfiguration": {
                         "enableAutomaticUpdates": true,
-                        "provisionVmAgent": false,
+                        "provisionVmAgent": true,
                         "patchSettings": {
-                            "enableHotpatching": true,
+                            "enableHotpatching": false,
                             "patchMode": "AutomaticByOS"
                         }
                     }
