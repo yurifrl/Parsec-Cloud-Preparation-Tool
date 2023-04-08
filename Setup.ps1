@@ -13,6 +13,10 @@ $softwareList = @(
     "Url"   = "https://cdn.stubdownloader.services.mozilla.com/builds/firefox-stub/pt-BR/win/793925e36c1d92460e349e7af6a5f4a708c9acb6ffea5be0fe11dcf56def58bb/Firefox%20Installer.exe" 
   },
   @{
+    "Name"  = "Steam"
+    "Url"   = "https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe"
+  },
+  @{
     "Name"  = "Parsec"
     "Url"   = "https://builds.parsec.app/package/parsec-windows.exe" 
   },
@@ -27,10 +31,6 @@ $softwareList = @(
   @{
     "Name"  = "Star Citizen"
     "Url"   = "https://install.robertsspaceindustries.com/star-citizen/RSI-Setup-1.6.5.exe" 
-  },
-  @{
-    "Name"  = "Steam"
-    "Url"   = "https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe" 
   },
   @{
     "Name"  = "Battle.net"
@@ -51,15 +51,22 @@ foreach ($software in $softwareList) {
 # Modify Registry
 $modifyRegistry = Read-Host -Prompt 'Do you want to modify the Winlogon and Personalization registry key? (y/n)'
 if ($modifyRegistry -eq 'y') {
-  # Modify the 'Winlogon' registry key
-  $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-  $WinlogonPropertyName = "YourPropertyName" # Replace with the actual property name
-  $WinlogonPropertyValue = "YourValue" # Replace with the actual value you want to set
-  Set-ItemProperty -Path $WinlogonPath -Name $WinlogonPropertyName -Value $WinlogonPropertyValue
+  # Set DefaultUserName to 'parsec'
+  $username = "your_username_here"
+  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultUserName" -Value $username
 
-  # Modify the 'Personalization' registry key
-  $PersonalizationPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
-  $PersonalizationPropertyName = "YourPropertyName" # Replace with the actual property name
-  $PersonalizationPropertyValue = "YourValue" # Replace with the actual value you want to set
-  Set-ItemProperty -Path $PersonalizationPath -Name $PersonalizationPropertyName -Value $PersonalizationPropertyValue
+  # Set DefaultPassword to the desired password
+  $password = "your_password_here"
+  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value $password
+
+  # Set AutoAdminLogon to 1
+  Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "1"
+
+  # Create Personalization key if it does not exist
+  if (-not(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
+      New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" -Name "Personalization" | Out-Null
+  }
+
+  # Set NoLockScreen D-word value to 1
+  Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -Value 1 -Type DWord
 }

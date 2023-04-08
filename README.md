@@ -30,3 +30,15 @@ CD $LocalArchivePath\Parsec-Cloud-Preparation-Tool-master\ | powershell.exe .\Lo
 ## Issues with Windows RDP
 
 - Remove `Microsoft Hyper-V Video` from `Device Manager` > `Display Adapters`
+
+## Nvidia drivers
+
+[Nvidia drivers search](https://www.nvidia.com/Download/index.aspx)
+[Nvidia latest driver](https://us.download.nvidia.com/tesla/528.89/528.89-data-center-tesla-desktop-win10-win11-64bit-dch-international.exe)
+
+This are the queries for the driver search of the `Standard_NV6ads_A10_v5`
+```
+Product Type: Data Center / Tesla
+Product Series: A10 Series
+Product: A10
+```

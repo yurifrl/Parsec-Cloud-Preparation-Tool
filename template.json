@@ -86,11 +86,11 @@
                     "adminPassword": "[parameters('adminPassword')]",
                     "customData": "[base64(parameters('customData'))]",
                     "windowsConfiguration": {
-                        "enableAutomaticUpdates": false,
+                        "enableAutomaticUpdates": true,
                         "provisionVmAgent": false,
                         "patchSettings": {
-                            "enableHotpatching": false,
-                            "patchMode": "Manual"
+                            "enableHotpatching": true,
+                            "patchMode": "AutomaticByOS"
                         }
                     }
                 },
