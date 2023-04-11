@@ -42,3 +42,7 @@ Product Type: Data Center / Tesla
 Product Series: A10 Series
 Product: A10
 ```
+
+## Autologon
+
+https://learn.microsoft.com/en-us/sysinternals/downloads/autologon
